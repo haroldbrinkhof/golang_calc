@@ -1,7 +1,8 @@
 # calc
 Just trying to get a little hand at coding go with some homework for /r/programmingfunny
 
-## usage calc "1 +2 +3"
+## usage 
+calc "1 +2 +3" or echo "1 + 2" | calc
 
 ## flags:
 - \-s preceedes the outcome with the input and =
