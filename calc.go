@@ -12,11 +12,9 @@ import (
 )
 
 func main() {
-	useGUI := false
 	showCalculations := false
 
 	// cli flag parsing
-	flag.BoolVar(&useGUI, "g", false, "starts the gui")
 	flag.BoolVar(&showCalculations, "s", false, "show initial term before result, e.g. 1 + 2 = 3")
 	flag.Parse()
 	// handle any extra terms given
