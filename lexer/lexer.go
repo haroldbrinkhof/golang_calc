@@ -113,7 +113,7 @@ func getNextToken(remainder string, prevOperator OperatorType) (float64, Operato
 	p := strings.IndexAny(remainder, operators)
 	if p >= 0 {
 		op := determineOperator([]rune(remainder)[p])
-		isSign := p == 0 && len(remainder) > 1 && (op == OpMinus || op == OpPlus) && prevOperator != OpNone
+		isSign := p == 0 && len(remainder) > 1 && (op == OpMinus || op == OpPlus) && prevOperator != OpNone && prevOperator != OpParensRight
 
 		if isSign {
 			// we have a + or - sign indicator, not operator, get value following
