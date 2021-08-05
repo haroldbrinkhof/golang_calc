@@ -67,8 +67,7 @@ func TestCalculatePlusNegative(t *testing.T) {
 
 func TestCalculateMultiply(t *testing.T) {
 
-	if actual, err := Calculate("3 * 2"); actual != 6 {
-		t.Error(err)
+	if actual,  := Calculate("3 * 2"); actual != 6 {
 		t.Errorf("expected 6 but got %f\n", actual)
 	}
 }

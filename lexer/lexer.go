@@ -38,7 +38,7 @@ func (t *Token) Value() float64 {
 	return t.value
 }
 
-const operators string = "+-*/()"
+const operators string = "+-*/()%^V"
 const opFirst OperatorType = -1
 const OpNone OperatorType = 0
 const OpPlus OperatorType = 1
@@ -47,6 +47,9 @@ const OpMultiply OperatorType = 3
 const OpDivide OperatorType = 4
 const OpParensLeft OperatorType = 5
 const OpParensRight OperatorType = 6
+const OpPow OperatorType = 7
+const OpSqrt = 8
+const OpMod = 9
 
 func (o OperatorType) Priority() int8 {
 	switch o {
@@ -57,7 +60,13 @@ func (o OperatorType) Priority() int8 {
 	case OpDivide:
 		fallthrough
 	case OpMultiply:
+		fallthrough
+	case OpMod:
 		return 1
+	case OpPow:
+		fallthrough
+	case OpSqrt:
+		return 2
 	case OpParensLeft:
 		fallthrough
 	case OpParensRight:
@@ -65,6 +74,10 @@ func (o OperatorType) Priority() int8 {
 	default:
 		return -1
 	}
+}
+
+func (o OperatorType) HasSingularInput() bool {
+	return o == OpSqrt
 }
 
 const Numeral TokenType = 1
@@ -173,6 +186,12 @@ func determineOperator(op rune) OperatorType {
 		return OpParensLeft
 	case op == ')':
 		return OpParensRight
+	case op == '%':
+		return OpMod
+	case op == '^':
+		return OpPow
+	case op == 'V':
+		return OpSqrt
 	default:
 		return OpNone
 	}

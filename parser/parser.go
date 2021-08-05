@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"math"
 
 	"catsandcoding.be/calc/lexer"
 )
@@ -16,7 +17,7 @@ type Term struct {
 }
 
 func (t *Term) calculate() (float64, error) {
-	if t.leftHand == nil || t.rightHand == nil {
+	if (t.leftHand == nil || t.rightHand == nil) && !t.operator.HasSingularInput() {
 		return 0, errors.New("Parse error can not calculate total; both left hand and right hand need to be filled in.")
 	}
 
@@ -35,6 +36,15 @@ func (t *Term) calculate() (float64, error) {
 		return total, nil
 	case lexer.OpMultiply:
 		total := *(t.leftHand) * *(t.rightHand)
+		return total, nil
+	case lexer.OpPow:
+		total := math.Pow(*(t.leftHand), *(t.rightHand))
+		return total, nil
+	case lexer.OpMod:
+		total := math.Mod(*(t.leftHand), *(t.rightHand))
+		return total, nil
+	case lexer.OpSqrt:
+		total := math.Sqrt(*(t.rightHand))
 		return total, nil
 	default:
 		return 0, errors.New("Parse error can not calculate total of this term; operator.")
@@ -84,8 +94,8 @@ func parse(chain *Chain) (float64, error) {
 			// with the total calculated we now assign it to
 			// the nearest appropriate term,i.e the one with highest priority
 			// or the left side
-			if term.rightTerm != nil && term.rightTerm.priority == term.priority {
-				// right side has priority assign here
+			if term.rightTerm != nil && (term.rightTerm.priority == term.priority || term.leftTerm == nil) {
+				// right side has priority or we have no left side
 				if term.rightTerm.leftHand == nil {
 					term.rightTerm.leftHand = &total
 				}
@@ -144,11 +154,13 @@ func parse(chain *Chain) (float64, error) {
 }
 func stealValues(t *Term) error {
 	if t.leftHand == nil {
-		if t.leftTerm == nil || t.leftTerm.rightHand == nil {
+		if (t.leftTerm == nil || t.leftTerm.rightHand == nil) && !t.operator.HasSingularInput() {
 			return errors.New("Parse error: no value to steal for left hand")
 		}
-		t.leftHand = t.leftTerm.rightHand
-		t.leftTerm.rightHand = nil
+		if t.leftTerm != nil {
+			t.leftHand = t.leftTerm.rightHand
+			t.leftTerm.rightHand = nil
+		}
 	}
 	if t.rightHand == nil {
 		if t.rightTerm == nil || t.rightTerm.leftHand == nil {
@@ -186,7 +198,7 @@ func transform(chain *lexer.Chain) (*Chain, error) {
 					term.operator = lexer.OperatorType(t.Value())
 					term.priority = uint16(basePriority) + uint16(term.operator.Priority())
 					// if no value has been set yet, steal the right one from the previous term
-					if term.leftHand == nil {
+					if term.leftHand == nil && !term.operator.HasSingularInput() {
 						if term.leftTerm == nil {
 							return nil, errors.New("Parse error: numerals must preceed an operator")
 						}
